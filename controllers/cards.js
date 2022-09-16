@@ -1,27 +1,30 @@
-const ErrorNotFound = require('../errors/ErrorNotFound');
-const ValidationError = require('../errors/ValidationError');
-const ErrorDefault = require('../errors/ErrorDefault');
 const Cards = require('../models/card');
-const errorMessageValid = new ValidationError('Переданы некорректные данные');
-const errorMessageNotFound = new ErrorNotFound('Карточка не найдена');
-const errorMessageDefault = new ErrorDefault('Ошибка по-умолчанию');
+
+const ValidationError = 400;
+const NotFoundError = 404;
+const DefaultError = 500;
 
 module.exports.getCard = (req, res) => {
   Cards.find({})
     .then(cards => res.send({ data: cards }))
-    .catch(err => res.status(500).send({ message: 'Ошибка по-умолчанию' }));
+    .catch(err => {
+      if (err.statusCode === NotFoundError) {
+        return res.status(NotFoundError).send({ message: 'Не найдено ни одной карточки' })
+      }
+      return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' });
+    });
 };
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const ownerId = req.user._id;
   Cards.create({ name, link, owner: ownerId })
-    .then(card => res.status(200).send({ data: card }))
+    .then(card => res.send({ data: card }))
     .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' })
+      if (err.statusCode === ValidationError) {
+        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
       }
-      return res.status(500).send({ message: 'Ошибка по-умолчанию' });
+      return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -32,17 +35,17 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      throw new ErrorNotFound('Карточка не найдена')
+      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
     })
-    .then(card => res.status(200).send({ data: card }))
+    .then(card => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === 404) {
-        return res.status(404).send({ message: 'Карточка не найдена' })
+      if (err.statusCode === ValidationError) {
+        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
+      } else if (err.statusCode === NotFoundError) {
+        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
       }
       else {
-        return res.status(500).send({ message: 'Ошибка по-умолчанию' })
+        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
       }
     })
 }
@@ -53,17 +56,17 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      throw new ErrorNotFound('Карточка не найдена')
+      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.statusCode === 400 || err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === 404 || err.name === 'CastError') {
-        return res.status(404).send({ message: 'Карточка не найдена' })
+      if (err.statusCode === ValidationError) {
+        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
+      } else if (err.statusCode === NotFoundError) {
+        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
       }
       else {
-        return res.status(500).send({ message: 'Ошибка по-умолчанию' })
+        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
       }
     })
 }
@@ -71,17 +74,17 @@ module.exports.dislikeCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Cards.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
-      throw new ErrorNotFound('Карточка не найдена')
+      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === 404) {
-        return res.status(404).send({ message: err.errorMessage })
+      if (err.statusCode === ValidationError) {
+        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
+      } else if (err.statusCode === NotFoundError) {
+        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
       }
       else {
-        return res.status(500).send({ message: 'Ошибка по-умолчанию' })
+        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
       }
     })
 };
