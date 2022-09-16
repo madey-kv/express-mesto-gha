@@ -31,11 +31,11 @@ module.exports.createUser = (req, res) => {
   Users.create({ name, about, avatar })
     .then(user => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
+      if (err.statusCode === 400) {
+        return res.status(400).send({ message: 'Переданы некорректные данные' })
       }
       else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
+        return res.status(500).send({ message: 'Ошибка по умолчанию' })
       }
     })
 };
