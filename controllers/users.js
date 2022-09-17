@@ -6,7 +6,7 @@ const DefaultError = 500;
 module.exports.getUser = (req, res) => {
   Users.find({})
     .then(users => res.send({ data: users }))
-    .catch(() => res.status(DefaultError).send({ message: 'Ошибка по-умолчанию' }));
+    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
 };
 
 module.exports.getUserId = (req, res) => {
@@ -16,28 +16,28 @@ module.exports.getUserId = (req, res) => {
     })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Пользователь не найден' })
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Пользователь по указанному _id не найден.",
+        });
+      } else {
+        res.status(404).send({ message: "Произошла ошибка" });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 };
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   Users.create({ name, about, avatar })
-    .then(user => res.status(200).send({ data: user }))
+    .then(user => res.send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === 400) {
-        return res.status(400).send({ message: 'Переданы некорректные данные' })
+      if (err.name === "ValidationError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные при создании пользователя.",
+        });
+      } else {
+        res.status(500).send({ message: "Произошла ошибка" });
       }
-      else {
-        return res.status(500).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 };
 
 module.exports.updateUserInfo = (req, res) => {
@@ -48,15 +48,21 @@ module.exports.updateUserInfo = (req, res) => {
     })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Пользователь не найден' })
+      if (err.name === "ValidationError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные при обновлении профиля.",
+        });
+      } else if (err.name === "CastError") {
+        res.status(404).send({
+          message: "Пользователь по указанному _id не найден.",
+        });
+      } else {
+        res.status(500).send({
+          message:
+            "Данные не прошли валидацию. Либо произошло что-то совсем немыслимое",
+        });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -68,13 +74,19 @@ module.exports.updateAvatar = (req, res) => {
     })
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Пользователь не найден' })
+      if (err.name === "ValidationError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные при обновлении профиля.",
+        });
+      } else if (err.name === "CastError") {
+        res.status(404).send({
+          message: "Пользователь по указанному _id не найден.",
+        });
+      } else {
+        res.status(500).send({
+          message:
+            "Данные не прошли валидацию. Либо произошло что-то совсем немыслимое",
+        });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 };

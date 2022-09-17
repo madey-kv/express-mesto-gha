@@ -7,12 +7,7 @@ const DefaultError = 500;
 module.exports.getCard = (req, res) => {
   Cards.find({})
     .then(cards => res.send({ data: cards }))
-    .catch(err => {
-      if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Не найдено ни одной карточки' })
-      }
-      return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' });
-    });
+    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -20,11 +15,14 @@ module.exports.createCard = (req, res) => {
   const ownerId = req.user._id;
   Cards.create({ name, link, owner: ownerId })
     .then(card => res.send({ data: card }))
-    .catch(err => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res
+          .status(400)
+          .send({ message: "Переданы некорректные данные карточки" });
+      } else {
+        res.status(500).send({ message: "Произошла ошибка" });
       }
-      return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' });
     });
 };
 
@@ -39,15 +37,14 @@ module.exports.likeCard = (req, res) => {
     })
     .then(card => res.send({ data: card }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные для постановки лайка.",
+        });
+      } else {
+        res.status(500).send({ message: "Произошла ошибка" });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 }
 
 module.exports.dislikeCard = (req, res) => {
@@ -60,15 +57,14 @@ module.exports.dislikeCard = (req, res) => {
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
+      if (err.name === "CastError") {
+        res
+          .status(400)
+          .send({ message: "Переданы некорректные данные для снятия лайка." });
+      } else {
+        res.status(500).send({ message: "Произошла ошибка" });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 }
 
 module.exports.deleteCard = (req, res) => {
@@ -78,13 +74,12 @@ module.exports.deleteCard = (req, res) => {
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.statusCode === ValidationError) {
-        return res.status(ValidationError).send({ message: 'Переданы некорректные данные' })
-      } else if (err.statusCode === NotFoundError) {
-        return res.status(NotFoundError).send({ message: 'Карточка не найдена' })
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные.",
+        });
+      } else {
+        res.status(500).send({ message: "Произошла ошибка" });
       }
-      else {
-        return res.status(DefaultError).send({ message: 'Ошибка по умолчанию' })
-      }
-    })
+    });
 };
