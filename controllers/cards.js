@@ -1,10 +1,6 @@
 const Cards = require('../models/card');
 
-const ValidationError = 400;
-const NotFoundError = 404;
-const DefaultError = 500;
-
-module.exports.getCard = (req, res) => {
+module.exports.getCards = (req, res) => {
   Cards.find({})
     .then(cards => res.send({ data: cards }))
     .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
@@ -19,7 +15,7 @@ module.exports.createCard = (req, res) => {
       if (err.name === "ValidationError") {
         res
           .status(400)
-          .send({ message: "Переданы некорректные данные карточки" });
+          .send({ message: "Переданы некорректные данные'" });
       } else {
         res.status(500).send({ message: "Произошла ошибка" });
       }
@@ -33,13 +29,13 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
+      res.status(404).send({ message: 'Карточка не найдена' });
     })
     .then(card => res.send({ data: card }))
     .catch((err) => {
       if (err.name === "CastError") {
         res.status(400).send({
-          message: "Переданы некорректные данные для постановки лайка.",
+          message: "Переданы некорректные данные'",
         });
       } else {
         res.status(500).send({ message: "Произошла ошибка" });
@@ -53,14 +49,14 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .orFail(() => {
-      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
+      res.status(404).send({ message: 'Карточка не найдена' });
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === "CastError") {
         res
           .status(400)
-          .send({ message: "Переданы некорректные данные для снятия лайка." });
+          .send({ message: "Переданы некорректные данные'" });
       } else {
         res.status(500).send({ message: "Произошла ошибка" });
       }
@@ -70,13 +66,13 @@ module.exports.dislikeCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Cards.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
-      res.status(NotFoundError).send({ message: 'Карточка не найдена' });
+      res.status(404).send({ message: 'Карточка не найдена' });
     })
     .then(card => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === "CastError") {
         res.status(400).send({
-          message: "Переданы некорректные данные.",
+          message: "Переданы некорректные данные'",
         });
       } else {
         res.status(500).send({ message: "Произошла ошибка" });
