@@ -23,6 +23,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
+app.use((req, res) => {
+  res.status(404).send({ message: "Роутер не найден!" });
+});
 app.use('/users', routerUsers);
 app.use('/cards', routerCards);
 
