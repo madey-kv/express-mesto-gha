@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '63236843588de69fb3bc3534'
+    _id: '63236843588de69fb3bc3534',
   };
 
   next();
@@ -27,9 +27,8 @@ app.use(express.json());
 app.use('/users', routerUsers);
 app.use('/cards', routerCards);
 app.use((req, res) => {
-  res.status(404).send({ message: "Роутер не найден!" });
+  res.status(404).send({ message: 'Роутер не найден!' });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Works on ${PORT}`);
