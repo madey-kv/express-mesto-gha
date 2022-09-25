@@ -1,13 +1,13 @@
 const Cards = require('../models/card');
 const { validationError, notFoundError, defaultError } = require('../errors/errors');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Cards.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(defaultError).send({ message: 'Произошла ошибка' }));
+    .catch((err) => next(err));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const ownerId = req.user._id;
   Cards.create({ name, link, owner: ownerId })
@@ -20,10 +20,11 @@ module.exports.createCard = (req, res) => {
       } else {
         res.status(defaultError).send({ message: 'Произошла ошибка' });
       }
+      return next(err);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -43,10 +44,11 @@ module.exports.likeCard = (req, res) => {
       } else {
         res.status(defaultError).send({ message: 'Произошла ошибка' });
       }
+      return next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Cards.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -66,10 +68,11 @@ module.exports.dislikeCard = (req, res) => {
       } else {
         res.status(defaultError).send({ message: 'Произошла ошибка' });
       }
+      return next(err);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Cards.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
       throw new Error('NotFound');
@@ -85,5 +88,6 @@ module.exports.deleteCard = (req, res) => {
       } else {
         res.status(defaultError).send({ message: 'Произошла ошибка' });
       }
+      return next(err);
     });
 };
