@@ -92,9 +92,8 @@ module.exports.getUserById = (req, res, next) => {
         res.status(validationError).send({
           message: 'Переданы некорректные данные',
         });
-      } else {
-        return next(err);
       }
+      return next(err);
     });
 };
 
@@ -112,9 +111,8 @@ module.exports.updateUserInfo = (req, res, next) => {
         res.status(validationError).send({
           message: 'Переданы некорректные данные',
         });
-      } else {
-        return next(err);
       }
+      return next(err);
     });
 };
 
@@ -133,9 +131,8 @@ module.exports.updateAvatar = (req, res, next) => {
         res.status(validationError).send({
           message: 'Переданы некорректные данные',
         });
-      } else {
-        return next(err);
       }
+      return next(err);
     });
 };
 
