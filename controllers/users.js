@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('../models/user');
 const {
-  validationError, notFoundError, conflictError,
+  validationError, notFoundError, conflictError, unauthorised,
 } = require('../errors/errors');
 
 module.exports.getUsers = (req, res, next) => {
@@ -147,6 +147,10 @@ module.exports.login = (req, res, next) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(validationError).send({
           message: 'Переданы некорректные данные',
+        });
+      } else if (err.name === 'Необходима авторизация') {
+        res.status(unauthorised).send({
+          message: 'Пожалуйста, войдите в личный кабинет',
         });
       }
       return next(err);
