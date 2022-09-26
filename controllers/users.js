@@ -148,7 +148,7 @@ module.exports.login = (req, res, next) => {
         res.status(validationError).send({
           message: 'Переданы некорректные данные',
         });
-      } else if (err.name === 'Необходима авторизация') {
+      } else if (err.message === 'Необходима авторизация') {
         res.status(unauthorised).send({
           message: 'Пожалуйста, войдите в личный кабинет',
         });
