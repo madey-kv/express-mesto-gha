@@ -57,21 +57,20 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Карточка не найдена');
+    })
     .then((card) => {
-      if (card === null) {
-        throw new NotFoundError('Передан несуществующий id карточки');
-      } else {
-        res.send(card);
+      if (!card) {
+        next(new NotFoundError('Передан несуществующий id карточки'));
       }
+      res.send({ data: card });
     })
     .catch((err) => {
-      let prettyErr = err;
-      if (err.name === 'CastError') {
-        prettyErr = new BadRequestError('Передан некорректный формат id');
-      } else if (err.name === 'ValidationError') {
-        prettyErr = new BadRequestError('Переданы некорректные данные для постановки лайка');
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new BadRequestError({ message: err.errorMessage }));
       }
-      next(prettyErr);
+      next(err);
     });
 };
 
