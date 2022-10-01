@@ -31,18 +31,25 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
-module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
-  .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена.')))
-  .then((card) => {
-    if (card.owner.toString() !== req.user._id) {
-      throw new ForbiddenError('Операция удаления карточки недоступна данному пользователю.');
-    } else {
-      Card.findByIdAndDelete(req.params.cardId)
-        .then(() => res.send({ cardId: card._id }))
-        .catch(next);
-    }
-  })
-  .catch(next);
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params._id)
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка c указанным id не найдена');
+      } else if (card.owner !== req.user._id) {
+        throw new ForbiddenError('Попытка удалить чужую карточку');
+      }
+      return card;
+    })
+    .then((card) => card.delete())
+    .then((data) => res.send(data))
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+      }
+      next(err);
+    });
+};
 
 module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
