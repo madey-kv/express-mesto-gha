@@ -32,11 +32,12 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findById(req.params._id)
+  const { _id } = req.params;
+  Card.findById(_id)
     .then((card) => {
-      if (!card) {
+      if (card === null) {
         throw new NotFoundError('Карточка c указанным id не найдена');
-      } else if (card.owner !== req.user._id) {
+      } else if (!card.owner !== req.user._id) {
         throw new ForbiddenError('Попытка удалить чужую карточку');
       }
       return card;
@@ -44,10 +45,11 @@ module.exports.deleteCard = (req, res, next) => {
     .then((card) => card.delete())
     .then((data) => res.send(data))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+      let prettyErr = err;
+      if (err.name === 'CastError') {
+        prettyErr = new BadRequestError('Передан некорректный формат id');
       }
-      next(err);
+      next(prettyErr);
     });
 };
 
