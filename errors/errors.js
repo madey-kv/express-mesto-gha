@@ -1,10 +1,25 @@
-/* eslint-disable max-classes-per-file */
-class BadRequestError extends Error {
+// eslint-disable-next-line max-classes-per-file
+class ValidationError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = 400;
   }
 }
+
+class NotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = 404;
+  }
+}
+
+class DefaultError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = 500;
+  }
+}
+
 class UnauthorizedError extends Error {
   constructor(message) {
     super(message);
@@ -17,12 +32,6 @@ class ForbiddenError extends Error {
     this.statusCode = 403;
   }
 }
-class NotFoundError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 404;
-  }
-}
 
 class ConflictError extends Error {
   constructor(message) {
@@ -31,18 +40,11 @@ class ConflictError extends Error {
   }
 }
 
-class UnexpectedError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = 500;
-  }
-}
-
 module.exports = {
-  BadRequestError,
+  ValidationError,
+  NotFoundError,
+  DefaultError,
   UnauthorizedError,
   ForbiddenError,
-  NotFoundError,
   ConflictError,
-  UnexpectedError,
 };

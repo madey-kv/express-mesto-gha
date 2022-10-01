@@ -1,5 +1,3 @@
-/* eslint-disable no-useless-escape */
-
 const { celebrate, Joi } = require('celebrate');
 const usersRouter = require('express').Router();
 const {
@@ -27,7 +25,7 @@ usersRouter.patch('/me', celebrate({
 
 usersRouter.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().pattern(/(http(s)?:\/\/)?(www\.)?[A-Za-zА-Яа-я0-9-]*\.[A-Za-zА-Яа-я0-9-]{2,8}(\/?[\wа-яА-Я#!:.?+=&%@!_~[\]$'*+,;=()-]*)*/),
+    avatar: Joi.string().required().pattern(/(http(s)?:\/\/)?(www\.)?[A-Za-zА-Яа-я\d-]*\.[A-Za-zА-Яа-я\d-]{2,8}(\/?[\wа-яА-Я#!:.?+=&%@_~[\]$'*,;()-]*)*/),
   }),
 }), updateAvatar);
 

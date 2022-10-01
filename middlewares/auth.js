@@ -14,7 +14,7 @@ module.exports.auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'very-secret-key');
   } catch (err) {
-    throw new UnauthorizedError('Необходима авторизация');
+    throw new UnauthorizedError('Требуется авторизация');
   }
 
   req.user = payload;

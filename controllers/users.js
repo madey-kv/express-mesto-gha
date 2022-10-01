@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  BadRequestError,
+  ValidationError,
   NotFoundError,
   ConflictError,
 } = require('../errors/errors');
@@ -38,7 +38,7 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные.'));
+        next(new ValidationError('Переданы некорректные данные.'));
       } else if (err.code === 11000) {
         next(new ConflictError({ message: `Пользователь с адресом ${email} уже существует` }));
       }
@@ -60,7 +60,7 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        next(new ValidationError({ message: 'Переданы некорректные данные' }));
       }
       next(err);
     });
@@ -70,7 +70,7 @@ module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findOneAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new BadRequestError('Переданы некорректные данные');
+      throw new ValidationError('Переданы некорректные данные');
     })
     .then((user) => {
       if (!user) {
@@ -80,7 +80,7 @@ module.exports.updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        next(new ValidationError({ message: 'Переданы некорректные данные' }));
       }
       next(err);
     });
@@ -90,7 +90,7 @@ module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new BadRequestError('Переданы некорректные данные');
+      throw new ValidationError('Переданы некорректные данные');
     })
     .then((user) => {
       if (!user) {
@@ -100,7 +100,7 @@ module.exports.updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        next(new ValidationError({ message: 'Переданы некорректные данные' }));
       }
       next(err);
     });
@@ -132,7 +132,7 @@ module.exports.getUserInfo = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
+        next(new ValidationError({ message: 'Переданы некорректные данные' }));
       }
       next(err);
     });
