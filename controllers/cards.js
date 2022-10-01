@@ -31,26 +31,18 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
-module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .orFail(() => {
-      throw new NotFoundError('Карточка не найдена');
-    })
-    .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
-      } else if (card.owner !== req.user._id) {
-        next(new ForbiddenError('Невозможно удалить чужую карточку'));
-      }
-      res.status(200).send({ data: card, message: 'Карточка удалена' });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError({ message: 'Переданы некорректные данные' }));
-      }
-      next(err);
-    });
-};
+module.exports.deleteCard = (req, res, next) => Card.findById(req.params.cardId)
+  .orFail(() => next(new NotFoundError('Карточка с указанным _id не найдена.')))
+  .then((card) => {
+    if (card.owner.toString() !== req.user._id) {
+      throw new ForbiddenError('Операция удаления карточки недоступна данному пользователю.');
+    } else {
+      Card.findByIdAndDelete(req.params.cardId)
+        .then(() => res.send({ cardId: card._id }))
+        .catch(next);
+    }
+  })
+  .catch(next);
 
 module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
