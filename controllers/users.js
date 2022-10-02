@@ -1,11 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const {
-  ValidationError,
-  NotFoundError,
-  ConflictError,
-} = require('../errors/errors');
+const { ValidationError } = require('../errors/ValidationError');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { ConflictError } = require('../errors/ConflictError');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -40,7 +38,7 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new ValidationError('Переданы некорректные данные.'));
       } else if (err.code === 11000) {
-        next(new ConflictError({ message: `Пользователь с адресом ${email} уже существует` }));
+        next(new ConflictError(`Пользователь с адресом ${email} уже существует`));
       }
       next(err);
     });
@@ -52,15 +50,12 @@ module.exports.getUser = (req, res, next) => {
       throw new NotFoundError('Пользователь не найден');
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь не найден');
-      } else {
-        res.send(user);
-      }
+      res.send(user);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -68,19 +63,17 @@ module.exports.getUser = (req, res, next) => {
 
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
-  User.findOneAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new ValidationError('Переданы некорректные данные');
+      throw new NotFoundError('Пользователь с указанным id не найден');
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь с указанным id не найден');
-      }
       res.send(user);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -90,17 +83,15 @@ module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .orFail(() => {
-      throw new ValidationError('Переданы некорректные данные');
+      throw new NotFoundError('Пользователь с указанным id не найден')
     })
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь с указанным id не найден');
-      }
       res.send(user);
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -131,9 +122,6 @@ module.exports.getUserInfo = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
-      }
       next(err);
     });
 };

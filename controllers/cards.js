@@ -1,9 +1,7 @@
 const Card = require('../models/card');
-const {
-  ValidationError,
-  NotFoundError,
-  ForbiddenError,
-} = require('../errors/errors');
+const { ValidationError } = require('../errors/ValidationError');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { ForbiddenError } = require('../errors/ForbiddenError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -18,14 +16,12 @@ module.exports.createCard = (req, res, next) => {
   const ownerId = req.user._id;
   Card.create({ name, link, owner: ownerId })
     .then((card) => {
-      if (!card) {
-        next(new ValidationError('Переданы некорректные данные'));
-      }
       res.send({ data: card });
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -43,9 +39,10 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .then((card) => card.delete())
     .then((data) => res.send(data))
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError({ message: 'Переданы некорректные данные' }));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -61,14 +58,12 @@ module.exports.likeCard = (req, res, next) => {
       throw new NotFoundError('Карточка не найдена');
     })
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
-      }
       res.send({ data: card });
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные'));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
@@ -84,14 +79,12 @@ module.exports.dislikeCard = (req, res, next) => {
       throw new NotFoundError('Карточка не найдена');
     })
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка не найдена'));
-      }
       res.send({ data: card });
     })
+    // eslint-disable-next-line consistent-return
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные'));
+        return next(new ValidationError('Переданы некорректные данные'));
       }
       next(err);
     });
